@@ -13,7 +13,7 @@ The required libraries:
 - flac : https://github.com/xiph/flac
 - mxml : https://github.com/michaelrsweet/mxml
 
-Compile everything as *Relese* into a **STATIC** library, so without the .DLL files. Copy the necessary files to the ```lib``` directory, so it will look like this:
+Compile everything as *Release* into a **STATIC** library, so without the .DLL files. Copy the necessary files to the ```lib``` directory, so it will look like this:
 ```
 .
 +-- lib
