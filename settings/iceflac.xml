@@ -1,0 +1,70 @@
+<iceflac>
+	<!-- Not (yet) implemented -->
+	<settings>
+		<verbose>1</verbose>
+		<silent>0</silent>
+	</settings>
+
+	<!-- Icecast server settings -->
+	<server-settings>
+		<!-- Address of the server
+		     if the server is local: 127.0.0.1
+			 else: <hostname> from the icecast.xml
+		-->
+		<server>127.0.0.1</server>
+		
+		<!-- Port of the server
+			 <listen-socket> / <port> from the icecast.xml
+		-->
+		<port>8000</port>
+		
+		<!-- Username of the source, may not be changed -->
+		<user>source</user>
+		
+		<!-- Password of the source
+			 <authentication> / <source-password> from the icecast.xml
+		-->
+		<password>hackme</password>
+		
+		<!-- Mount of the server without the '/'
+			 <relay> / <mount> from the icecast.xml
+		-->
+		<mount>stream</mount>
+	</server-settings>
+   
+	<!-- Miscellaneous Icecast settings -->
+	<ice-settings>
+		<!-- If public it's liyted int the YPs 
+		     0 : disabled
+			 1 : enabled
+		-->
+		<public>0</public>
+		
+		<!-- Name of the stream -->
+		<name>Test Stream</name>
+	</ice-settings>
+   
+	<!--Playlist settings -->
+	<playlist-settings>
+		<!-- Path of the playlist file
+		     The playlist file is a regular text file containing the path of the .FLAC files.
+			 It can be exported via popular players.
+			 Don't have to be .M3U
+		-->
+		<playlist>playlist.m3u</playlist>
+		
+		<!-- Loop mode, if enabled: the playlist will restart after the last entry
+			 else: the program will exit after the last entry
+			 0 : disabled
+			 1 : enabled
+		-->
+		<loop>1</loop>
+		
+		<!-- Random mode, if enabled the playlist will randomly pick the next entry
+		     If it's on, the 'loop' setting will be discarded 
+			 0 : disabled
+			 1 : enabled
+		-->
+		<random>0</random>
+	</playlist-settings>
+</iceflac>
