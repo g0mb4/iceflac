@@ -18,7 +18,7 @@ The required libraries:
 - flac : https://github.com/xiph/flac
 - mxml : https://github.com/michaelrsweet/mxml
 
-Compile everything as *Release* into a **STATIC** library, so without the .DLL files. Copy the necessary files to the ```lib``` directory, so it will look like this:
+Compile everything as *Release* into a **STATIC** library, without the .DLL files. Copy the necessary files to the ```lib``` directory, wich should look like this:
 ```
 .
 +-- lib
@@ -29,7 +29,7 @@ Compile everything as *Release* into a **STATIC** library, so without the .DLL f
     +-- utf8_static.lib
     +-- win_utf8_io_static.lib
 ```
-Copy the include directories from ```flac/include```, ```libogg/include```, ```mxml/*.h``` to the  ```include ``` directory, so it will look like this:
+Copy the include directories from ```flac/include```, ```libogg/include```, ```mxml/*.h``` to the  ```include ``` directory, wich should look like this:
 ```
 .
 +-- include
