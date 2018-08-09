@@ -34,7 +34,7 @@ Copy the include directories from ```flac/include```, ```libogg/include```, ```m
     +-- share	(include/share)
     +-- ...
 ```
-Open the ```iceflac/iceflac.sln``` and compile the code.
+Open the ```iceflac/iceflac.sln``` and compile the code in Win32 (x86) mode.
 If everything was done correctly the ```iceflac.exe``` will be in the ```build/Release(Debug)``` directory.
 
 ## Usage
