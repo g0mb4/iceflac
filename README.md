@@ -6,6 +6,8 @@ A FLAC audio streamer for Icecast servers.
 My friend wanted to create a webradio using lossless audio files. This task was very hard in the open-source-way, so I decided to create a FLAC streamer application for Icecast, because it's a working solution.
 The targeted operating system was **Windows**, but the ```Icecast-libshout``` library was nearly impossible to compile, so I wrote a lightweight version of it.
 This program only works with **FLAC** files.
+Compiled with Visual Studio Community 2017 v15.7.6 on Windows 10 x64.
+Tested with Icecast v2.4.3.
 
 ## Compilation
 The required libraries:
