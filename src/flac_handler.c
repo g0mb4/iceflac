@@ -1,13 +1,5 @@
 #include "flac_handler.h"
 
-extern ice_clinet_t* ice;
-
-static FLAC__StreamDecoderWriteStatus _decode_write_callback(const FLAC__StreamDecoder *decoder, const FLAC__Frame *frame, const FLAC__int32 * const buffer[], void *client_data);
-static FLAC__StreamDecoderMetadataCallback _decode_metadata_callback(const FLAC__StreamDecoder *decoder, const FLAC__StreamMetadata *metadata, void *client_data);
-static FLAC__StreamDecoderErrorCallback _decode_error_callback(const FLAC__StreamDecoder *decoder, FLAC__StreamDecoderErrorStatus status, void *client_data);
-
-static FLAC__StreamEncoderWriteStatus _encode_write_callback(const FLAC__StreamEncoder *encoder, const FLAC__byte buffer[], size_t bytes, unsigned samples, unsigned current_frame, void *client_data);
-
 flac_handler_t * fh_init(ice_clinet_t *ice) {
 	flac_handler_t * fh = (flac_handler_t*)malloc(sizeof(flac_handler_t));
 	memset(fh, 0, sizeof(flac_handler_t));
@@ -61,7 +53,7 @@ void strtoupper(char *up, char *str) {
 int fh_decode_file(flac_handler_t * fh, const char *fname) {
 	FLAC__StreamDecoderInitStatus init_status;
 	FLAC__bool ok = true;
-	FLAC__StreamMetadata *tags = 0;
+	FLAC__StreamMetadata *tags = (FLAC__StreamMetadata *)malloc(sizeof(FLAC__StreamMetadata));
 	int i;
 
 	init_status = FLAC__stream_decoder_init_file(fh->decoder, fname, _decode_write_callback, _decode_metadata_callback, _decode_error_callback, (void*)fh);
@@ -92,6 +84,7 @@ int fh_decode_file(flac_handler_t * fh, const char *fname) {
 	}
 
 	FLAC__metadata_object_delete(tags);
+
 
 	for (i = 0; i < fh->ice->channels; i++) {
 		FREE_POINTER( fh->buffer[i] );
@@ -160,16 +153,18 @@ FLAC__StreamDecoderMetadataCallback _decode_metadata_callback(const FLAC__Stream
 		fh->ice->channels = metadata->data.stream_info.channels;
 		fh->bits_per_sampe = metadata->data.stream_info.bits_per_sample;
 		fh->total_size = (FLAC__uint32)(fh->total_samples * fh->ice->channels * (fh->bits_per_sampe / 8));	// size in bytes
-		double duration = (double)(fh->total_samples) / (double)(fh->ice->ice_samplerate);
-		fh->ice->ice_bitrate = (uint32_t)((fh->total_size * 8) / (duration));
+		fh->duration = (double)(fh->total_samples) / (double)(fh->ice->ice_samplerate);
+		fh->ice->ice_bitrate_raw = (uint32_t)((fh->total_size * 8) / (fh->duration));
+		fh->bitrate = 0.00085034 * fh->ice->channels * fh->bits_per_sampe * fh->ice->ice_samplerate; // ?
 
 		fprintf(stderr, "sample rate    : %u Hz\n", fh->ice->ice_samplerate);
 		fprintf(stderr, "channels       : %u\n", fh->ice->channels);
 		fprintf(stderr, "bits per sample: %u\n", fh->bits_per_sampe);
 		fprintf(stderr, "total samples  : %llu\n", fh->total_samples);
 		fprintf(stderr, "total size     : %u B\n", fh->total_size);
-		fprintf(stderr, "duration       : %.4f s\n", duration);
-		fprintf(stderr, "bitrate        : %u b/s\n", fh->ice->ice_bitrate);
+		fprintf(stderr, "duration       : %.4f s\n", fh->duration);
+		fprintf(stderr, "bitrate (FALC) : %u kb/s\n", fh->bitrate);
+		fprintf(stderr, "bitrate (raw)  : %u kb/s\n", (fh->ice->ice_bitrate_raw / 1000));
 
 		fh->buf_position = 0;
 		fh->buffer = (uint32_t**)malloc(fh->ice->channels * sizeof(uint32_t*));
@@ -208,8 +203,12 @@ int fh_encode_stream(flac_handler_t * fh) {
 	FLAC__stream_encoder_init_ogg_stream(fh->encoder, NULL, _encode_write_callback, NULL, NULL, NULL, (void*)fh);
 	
 	fh->streamed_bytes = 0;
+	fh->write_count = 0;
+
+	fh->timestamp = 0;
+	fh->timestamp_new = 0;
 	ok = FLAC__stream_encoder_process(fh->encoder, fh->buffer, fh->total_samples);
-	fprintf(stderr, "encoding: %s\n", ok ? "succeeded" : "FAILED");
+	//fprintf(stderr, "encoding: %s\n", ok ? "succeeded" : "FAILED");
 
 	FLAC__stream_encoder_finish(fh->encoder);
 
@@ -218,17 +217,77 @@ int fh_encode_stream(flac_handler_t * fh) {
 
 static FLAC__StreamEncoderWriteStatus _encode_write_callback(const FLAC__StreamEncoder *encoder, const FLAC__byte buffer[], size_t bytes, unsigned samples, unsigned current_frame, void *client_data) {
 	flac_handler_t * fh = (flac_handler_t *)client_data;
+	ogg_page og;
+	int granulepos;
+	char time[128];
 
 	(void)encoder;
-	
+
+	if ((fh->write_count & 0x1) == 0) {
+		/* ogg header */
+		og.header = (unsigned char *)buffer;
+		og.header_len = bytes;
+		og.body = NULL;
+		og.body_len = 0;
+
+		switch ((granulepos = ogg_page_granulepos(&og)))
+		{
+		case -1:
+			break;
+		case 0:
+			break;
+		default:
+			fh->timestamp_new = (double)granulepos / (double)fh->ice->ice_samplerate;
+		}
+	} else {
+		/* ogg body */
+		fh->streamed_bytes += bytes;
+
+		printprogress(fh->timestamp_new, fh->duration);
+
+		double sleepms = (int)((fh->timestamp_new - fh->timestamp) * 1000.0);
+
+		if (sleepms > 40) {
+			sleepms -= 10;	// give some time to the server to process
+		}
+
+		Sleep(sleepms);
+
+		fh->timestamp = fh->timestamp_new;
+	}
+
 	if (ice_send_data(fh->ice, buffer, bytes) < 0) {
 		fprintf(stderr, "encoder: ice_send_data() failed\n");
 		return FLAC__STREAM_ENCODER_WRITE_STATUS_FATAL_ERROR;
 	}
 
-	fh->streamed_bytes += bytes;
-	Sleep(50);
-	//fprintf(stderr, "\r %u             ", fh->streamed_bytes);
-
+	fh->write_count++;
+	
 	return FLAC__STREAM_ENCODER_WRITE_STATUS_OK;
+}
+
+void printprogress(double time, double duration) {
+	int hour = (int)time / 3600;
+	int min = ((int)time / 60) % 60;
+	int sec = (int)time % 60;
+	int i;
+
+	double progress = ((time / duration) * 100.0);
+
+	printf("\r [");
+	for (i = 0; i < 21; i++) {
+		if ((i * 5) <= (progress)) {
+			printf("#");
+		} else {
+			printf("_");
+		}
+	}
+	printf("]  ");
+
+	if (hour == 0) {
+		printf("%02d:%02d", min, sec);
+	}
+	else {
+		printf("%d:%02d:%02d", hour, min, sec);
+	}
 }

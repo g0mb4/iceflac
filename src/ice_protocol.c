@@ -22,7 +22,7 @@ ice_clinet_t *ice_init(void) {
 
 	ice->ice_public = 0;
 	ice->ice_name = NULL;
-	ice->ice_bitrate = 0;
+	ice->ice_bitrate_raw = 0;
 	ice->ice_samplerate = 0;
 
 	return ice;
@@ -194,7 +194,7 @@ int ice_auth(ice_clinet_t * ice, uint8_t method) {
 			"Ice-bitrate: %u\r\n"
 			"Ice-audio-info: samplerate=%u;channels=%d\r\n"
 			"\r\n",
-			ice->mount, user_pass_64, USER_AGENT, ice->ice_public, ice->ice_name, ice->ice_bitrate, ice->ice_samplerate, ice->channels);
+			ice->mount, user_pass_64, USER_AGENT, ice->ice_public, ice->ice_name, ice->ice_bitrate_raw, ice->ice_samplerate, ice->channels);
 
 	}
 	else if (method == AUTH_PUT) {
@@ -209,7 +209,7 @@ int ice_auth(ice_clinet_t * ice, uint8_t method) {
 			"Ice-audio-info: samplerate=%u;channels=%d\r\n"
 			"Expect: 100-continue\r\n"
 			"\r\n",
-			ice->mount, user_pass_64, USER_AGENT, ice->ice_public, ice->ice_name, ice->ice_bitrate, ice->ice_samplerate, ice->channels);
+			ice->mount, user_pass_64, USER_AGENT, ice->ice_public, ice->ice_name, ice->ice_bitrate_raw, ice->ice_samplerate, ice->channels);
 	}
 	else {
 		fprintf(stderr, "ice: unknown authentication method\n");

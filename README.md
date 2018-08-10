@@ -48,7 +48,6 @@ Modify the content of the ```iceflac.xml```.
 To use such a high bitrate a FLAC can provide, modify the  ```<limits> / <queue-size>``` setting in the configuration file of the icecast server. My setting is ```<queue-size>111524288</queue-size>```.
 
 ## TODO
-- More elegant package scheduling
 - Support for UTF-8 filenames
 - Implement verbose/silent features
 - Linux port (rewrite the ice protocol)

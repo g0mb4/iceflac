@@ -46,7 +46,7 @@ typedef struct S_ICE_CLIENT {
 	char *artist;
 	char *title;
 
-	uint32_t ice_bitrate;
+	uint32_t ice_bitrate_raw;
 	uint32_t ice_samplerate;
 	uint8_t channels;
 }ice_clinet_t;
