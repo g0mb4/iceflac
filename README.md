@@ -45,7 +45,7 @@ If everything was done correctly the ```iceflac.exe``` will be in the ```build/R
 ## Usage
 Copy the ```settings/iceflac.xml``` next to the ```iceflac.exe```.
 Modify the content of the ```iceflac.xml```.
-To use such a high bitrate (1411 kbps) modify the  ```<limits> / <queue-size>``` setting in the configuration file of the icecast server. My setting is ```<queue-size>111524288</queue-size>```.
+To use such a high bitrate a FLAC can provide, modify the  ```<limits> / <queue-size>``` setting in the configuration file of the icecast server. My setting is ```<queue-size>111524288</queue-size>```.
 
 ## TODO
 - More elegant package scheduling
