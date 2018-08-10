@@ -26,6 +26,9 @@ typedef struct S_PLAYLIST {
 
 	bool loop;
 	bool random;
+
+	bool verbose;
+	bool silent;
 } playlist_t;
 
 playlist_t * pl_init(char *fname);
@@ -33,6 +36,9 @@ void pl_destroy(playlist_t * pl);
 
 void pl_set_loop(playlist_t * pl, bool l);
 void pl_set_random(playlist_t * pl, bool r);
+
+void pl_set_verbose(playlist_t * pl, bool v);
+void pl_set_silent(playlist_t * pl, bool s);
 
 bool _pl_add(playlist_t * pl, char *line);
 

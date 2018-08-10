@@ -49,6 +49,9 @@ typedef struct S_ICE_CLIENT {
 	uint32_t ice_bitrate_raw;
 	uint32_t ice_samplerate;
 	uint8_t channels;
+
+	bool verbose;
+	bool silent;
 }ice_clinet_t;
 
 ice_clinet_t *ice_init(void);
@@ -63,6 +66,9 @@ void ice_set_ice_public(ice_clinet_t * ice, bool p);
 void ice_set_ice_name(ice_clinet_t * ice, char *name);
 void ice_set_artist(ice_clinet_t * ice, char *artist);
 void ice_set_title(ice_clinet_t * ice, char *title);
+
+void ice_set_verbose(ice_clinet_t * ice, bool v);
+void ice_set_silent(ice_clinet_t * ice, bool s);
 
 int ice_connect(ice_clinet_t * ice);
 

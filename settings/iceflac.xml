@@ -1,7 +1,16 @@
 <iceflac>
-	<!-- Not (yet) implemented -->
+	<!-- Program settings -->
 	<settings>
+		<!-- Prints additional information 
+			 0 : disabled
+			 1 : enabled
+		-->
 		<verbose>1</verbose>
+		
+		<!-- No output, except for errors
+			 0 : disabled
+			 1 : enabled
+		-->
 		<silent>0</silent>
 	</settings>
 

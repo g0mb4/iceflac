@@ -22,6 +22,7 @@ int main(int argc, char **argv) {
 
 	char config_val[64];
 	int err = 0, a;
+	bool verbose = true, silent = false;
 
 	for (a = 0; a < argc; a++) {
 		if (!strcmp(argv[a], "-c") || !strcmp(argv[a], "--config")) {
@@ -51,6 +52,14 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 
+	if (cf_get_value("verbose", config_val)) {
+		verbose = config_val[0] != '0';
+	}
+
+	if (cf_get_value("silent", config_val)) {
+		silent = config_val[0] != '0';
+	}
+
 	// cf_print();
 
 	if (!cmd_playlist) {
@@ -73,6 +82,9 @@ int main(int argc, char **argv) {
 	if (cf_get_value("random", config_val)) {
 		pl_set_random(pl, config_val[0] != '0');
 	}
+
+	pl_set_verbose(pl, verbose);
+	pl_set_silent(pl, silent);
 
 	pl_print(pl);
 
@@ -120,6 +132,9 @@ int main(int argc, char **argv) {
 			ice_set_ice_name(ice, config_val);
 		}
 
+		ice_set_verbose(ice, verbose);
+		ice_set_silent(ice, silent);
+
 		flac = fh_init(ice);
 		if (flac) {
 			err = ice_connect(ice);
@@ -131,13 +146,17 @@ int main(int argc, char **argv) {
 						if (first_track) {
 							err = ice_auth(ice, AUTH_PUT);
 							if (err == 0) {
-								printf("connected to: %s:%s/%s as %s\n", ice->server, ice->port, ice->mount, ice->user);
+								if (!ice->silent) {
+									printf("connected to: %s:%s/%s as %s\n", ice->server, ice->port, ice->mount, ice->user);
+								}
 							}
 							else {
 								fprintf(stderr, "authentication with PUT method failed with error: %d\n", err);
 								err = ice_auth(ice, AUTH_SOURCE);
 								if (err == 0) {
-									printf("connected to: %s:%s/%s as %s\n", ice->server, ice->port, ice->mount, ice->user);
+									if (!ice->silent) {
+										printf("connected to: %s:%s/%s as %s\n", ice->server, ice->port, ice->mount, ice->user);
+									}
 								} else {
 									fprintf(stderr, "authentication with SOURCE method failed with error: %d\n", err);
 								}
@@ -146,7 +165,9 @@ int main(int argc, char **argv) {
 							first_track = false;
 						}
 						if (err == 0) {
-							fprintf_utf8(stderr, "\nplaying: %s - %s (%s)\n", ice->artist, ice->title, file_name);
+							if (!ice->silent) {
+								fprintf_utf8(stderr, "\nplaying: %s - %s (%s)\n", ice->artist, ice->title, file_name);
+							}
 							err = fh_encode_stream(flac);
 							if (err == 0) {
 								fprintf(stderr, "streaming done\n");

@@ -66,6 +66,14 @@ void pl_set_random(playlist_t * pl, bool r) {
 	pl->random = r;
 }
 
+void pl_set_verbose(playlist_t * pl, bool v) {
+	pl->verbose = v;
+}
+
+void pl_set_silent(playlist_t * pl, bool s) {
+	pl->silent = s;
+}
+
 bool _pl_add(playlist_t * pl, char *file) {
 	if (pl->len < pl->cap) {
 		uint32_t ind = strlen(file);
@@ -141,13 +149,17 @@ bool _pl_get_random(playlist_t * pl, char *file) {
 }
 
 void pl_print(playlist_t * pl) {
-	uint32_t i;
+	if (!pl->silent) {
+		uint32_t i;
 
-	fprintf(stderr, "loop   : %s\n", pl->loop ? "true" : "false");
-	fprintf(stderr, "random : %s\n", pl->random ? "true" : "false");
+		if (pl->verbose) {
+			fprintf(stderr, "loop   : %s\n", pl->loop ? "true" : "false");
+			fprintf(stderr, "random : %s\n", pl->random ? "true" : "false");
+		}
 
-	for (i = 0; i < pl->len; i++) {
-		fprintf_utf8(stderr, "%s\n", pl->list[i]);
+		for (i = 0; i < pl->len; i++) {
+			fprintf_utf8(stderr, "%s\n", pl->list[i]);
+		}
+		printf("\n");
 	}
-	printf("\n");
 }

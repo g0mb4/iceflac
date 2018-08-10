@@ -49,7 +49,6 @@ To use such a high bitrate a FLAC can provide, modify the  ```<limits> / <queue-
 
 ## TODO
 - Support for UTF-8 filenames
-- Implement verbose/silent features
 - Linux port (rewrite the ice protocol)
 - Clean the code
 

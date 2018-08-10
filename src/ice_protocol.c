@@ -25,6 +25,9 @@ ice_clinet_t *ice_init(void) {
 	ice->ice_bitrate_raw = 0;
 	ice->ice_samplerate = 0;
 
+	ice->verbose = true;
+	ice->silent = false;
+
 	return ice;
 }
 
@@ -108,6 +111,14 @@ void ice_set_title(ice_clinet_t * ice, char *title) {
 
 	ice->title = (char*)malloc(strlen(title) + 1);
 	strcpy(ice->title, title);
+}
+
+void ice_set_verbose(ice_clinet_t * ice, bool v) {
+	ice->verbose = v;
+}
+
+void ice_set_silent(ice_clinet_t * ice, bool s) {
+	ice->silent = s;
 }
 
 int ice_connect(ice_clinet_t * ice){

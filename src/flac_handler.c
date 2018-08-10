@@ -93,7 +93,9 @@ int fh_decode_file(flac_handler_t * fh, const char *fname) {
 	FREE_POINTER( fh->buffer );
 
 	ok = FLAC__stream_decoder_process_until_end_of_stream(fh->decoder);
-	fprintf(stderr, "decoding: %s\n", ok ? "succeeded" : "FAILED");
+	if (!fh->ice->silent && fh->ice->verbose) {
+		fprintf(stderr, "decoding: %s\n", ok ? "succeeded" : "FAILED");
+	}
 	//fprintf(stderr, "   state: %s\n", FLAC__StreamDecoderStateString[FLAC__stream_decoder_get_state(fh->decoder)]);
 
 	FLAC__stream_decoder_finish(fh->decoder);
@@ -157,14 +159,16 @@ FLAC__StreamDecoderMetadataCallback _decode_metadata_callback(const FLAC__Stream
 		fh->ice->ice_bitrate_raw = (uint32_t)((fh->total_size * 8) / (fh->duration));
 		fh->bitrate = 0.00085034 * fh->ice->channels * fh->bits_per_sampe * fh->ice->ice_samplerate; // ?
 
-		fprintf(stderr, "sample rate    : %u Hz\n", fh->ice->ice_samplerate);
-		fprintf(stderr, "channels       : %u\n", fh->ice->channels);
-		fprintf(stderr, "bits per sample: %u\n", fh->bits_per_sampe);
-		fprintf(stderr, "total samples  : %llu\n", fh->total_samples);
-		fprintf(stderr, "total size     : %u B\n", fh->total_size);
-		fprintf(stderr, "duration       : %.4f s\n", fh->duration);
-		fprintf(stderr, "bitrate (FALC) : %u kb/s\n", fh->bitrate);
-		fprintf(stderr, "bitrate (raw)  : %u kb/s\n", (fh->ice->ice_bitrate_raw / 1000));
+		if (!fh->ice->silent && fh->ice->verbose) {
+			fprintf(stderr, "sample rate    : %u Hz\n", fh->ice->ice_samplerate);
+			fprintf(stderr, "channels       : %u\n", fh->ice->channels);
+			fprintf(stderr, "bits per sample: %u\n", fh->bits_per_sampe);
+			fprintf(stderr, "total samples  : %llu\n", fh->total_samples);
+			fprintf(stderr, "total size     : %u B\n", fh->total_size);
+			fprintf(stderr, "duration       : %.4f s\n", fh->duration);
+			fprintf(stderr, "bitrate (FALC) : %u kb/s\n", fh->bitrate);
+			fprintf(stderr, "bitrate (raw)  : %u kb/s\n", (fh->ice->ice_bitrate_raw / 1000));
+		}
 
 		fh->buf_position = 0;
 		fh->buffer = (uint32_t**)malloc(fh->ice->channels * sizeof(uint32_t*));
@@ -243,7 +247,9 @@ static FLAC__StreamEncoderWriteStatus _encode_write_callback(const FLAC__StreamE
 		/* ogg body */
 		fh->streamed_bytes += bytes;
 
-		printprogress(fh->timestamp_new, fh->duration);
+		if (!fh->ice->silent) {
+			printprogress(fh->timestamp_new, fh->duration);
+		}
 
 		double sleepms = (int)((fh->timestamp_new - fh->timestamp) * 1000.0);
 
