@@ -5,20 +5,16 @@ A FLAC audio streamer for Icecast servers.
 ## What? Why?
 My friend wanted to create a webradio using lossless audio files. This task was very hard in the open-source-way, so I decided to create a FLAC streamer application for Icecast, because it's a working solution.
 The targeted operating system was **Windows**, but the ```Icecast-libshout``` library was nearly impossible to compile, so I wrote a lightweight version of it.
-
 This program only works with **FLAC** files.
 
-Compiled with Visual Studio Community 2017 v15.7.6 on Windows 10 x64.
-
-Tested with Icecast v2.4.3.
-
-## Compilation
-The required libraries:
+## Libraries
+Required libraries:
 - libogg : https://github.com/gcp/libogg
 - flac : https://github.com/xiph/flac
 - mxml : https://github.com/michaelrsweet/mxml
 
-Compile everything as *Release* into a **STATIC** library, without the .DLL files. Copy the necessary files to the ```lib``` directory, wich should look like this:
+## Build - Windows
+Compile everything as *Relese* into a **STATIC** library, so without the .DLL files. Copy the necessary files to the ```lib``` directory, so it will look like this:
 ```
 .
 +-- lib
@@ -29,7 +25,7 @@ Compile everything as *Release* into a **STATIC** library, without the .DLL file
     +-- utf8_static.lib
     +-- win_utf8_io_static.lib
 ```
-Copy the include directories from ```flac/include```, ```libogg/include```, ```mxml/*.h``` to the  ```include ``` directory, wich should look like this:
+Copy the include directories from ```flac/include```, ```libogg/include```, ```mxml/*.h``` to the  ```include ``` directory, so it will look like this:
 ```
 .
 +-- include
@@ -39,17 +35,26 @@ Copy the include directories from ```flac/include```, ```libogg/include```, ```m
     +-- share	(include/share)
     +-- ...
 ```
-Open the ```iceflac/iceflac.sln``` and compile the code in Win32 (x86) mode.
+Open the ```iceflac/iceflac.sln``` and compile the code.
 If everything was done correctly the ```iceflac.exe``` will be in the ```build/Release(Debug)``` directory.
+
+## Build - Linux
+Compile and install every library.
+
+```make```
+
+The ```iceflac``` binary will be in the ```build``` build directory.
 
 ## Usage
 Copy the ```settings/iceflac.xml``` next to the ```iceflac.exe```.
 Modify the content of the ```iceflac.xml```.
-To use such a high bitrate a FLAC can provide, modify the  ```<limits> / <queue-size>``` setting in the configuration file of the icecast server. My setting is ```<queue-size>111524288</queue-size>```.
+To use such a high bitrate (1411 kbps) modify the  ```<limits> / <queue-size>``` setting in the configuration file of the icecast server. My setting is ```<queue-size>111524288</queue-size>```.
+
+Use ```iceflac --help``` for additional informaton.
 
 ## TODO
 - Support for UTF-8 filenames
-- Linux port (rewrite the ice protocol)
+- Fix warnings
 - Clean the code
 
 ## Thanks to
