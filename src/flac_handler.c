@@ -63,7 +63,10 @@ int fh_decode_file(flac_handler_t * fh, const char *fname) {
 		return -1;
 	}
 #else
-
+	if ((fp = fopen(fname, "rb")) == NULL) {
+		fprintf(stderr, "decoder: fopen() failed on '%s'\n", fname);
+		return -1;
+	}
 #endif
 
 	init_status = FLAC__stream_decoder_init_FILE(fh->decoder, fp, _decode_write_callback, _decode_metadata_callback, _decode_error_callback, (void*)fh);
