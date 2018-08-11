@@ -43,7 +43,7 @@ void fh_destroy(flac_handler_t * fh) {
 	FREE_POINTER( fh->buffer );
 }
 
-void strtoupper(char *up, char *str) {
+void _strtoupper(char *up, char *str) {
 	while (*str) {
 		*up++ = toupper(*str++);
 	}
@@ -55,11 +55,22 @@ int fh_decode_file(flac_handler_t * fh, const char *fname) {
 	FLAC__bool ok = true;
 	FLAC__StreamMetadata *tags = (FLAC__StreamMetadata *)malloc(sizeof(FLAC__StreamMetadata));
 	uint32_t i;
+	FILE *fp = NULL;
 
-	init_status = FLAC__stream_decoder_init_file(fh->decoder, fname, _decode_write_callback, _decode_metadata_callback, _decode_error_callback, (void*)fh);
-	if (init_status != FLAC__STREAM_DECODER_INIT_STATUS_OK) {
-		fprintf(stderr, "decoder: FLAC__stream_decoder_init_file() failed with error: %s\n", FLAC__StreamDecoderInitStatusString[init_status]);
+#ifdef _WIN32
+	if ((fp = fopen(fname, "rb, ccs=UTF-8")) == NULL) {
+		fprintf(stderr, "decoder: fopen() failed on '%s'\n", fname);
 		return -1;
+	}
+#else
+
+#endif
+
+	init_status = FLAC__stream_decoder_init_FILE(fh->decoder, fp, _decode_write_callback, _decode_metadata_callback, _decode_error_callback, (void*)fh);
+	if (init_status != FLAC__STREAM_DECODER_INIT_STATUS_OK) {
+		fprintf(stderr, "decoder: FLAC__stream_decoder_init_FILE() failed with error: %s\n", FLAC__StreamDecoderInitStatusString[init_status]);
+		fclose(fp);
+		return -2;
 	}
 
 	char *name = NULL, *value = NULL, *name_up = NULL;
@@ -69,7 +80,7 @@ int fh_decode_file(flac_handler_t * fh, const char *fname) {
 
 			if (FLAC__metadata_object_vorbiscomment_entry_to_name_value_pair(entry, &name, &value)) {
 				name_up = (char *)malloc(strlen(name) + 1);
-				strtoupper(name_up, name);
+				_strtoupper(name_up, name);
 
 				if (!strcmp(name_up, "ARTIST")) {
 					ice_set_artist(fh->ice, value);
@@ -85,7 +96,6 @@ int fh_decode_file(flac_handler_t * fh, const char *fname) {
 
 	FLAC__metadata_object_delete(tags);
 
-
 	for (i = 0; i < fh->ice->channels; i++) {
 		FREE_POINTER( fh->buffer[i] );
 	}
@@ -96,6 +106,8 @@ int fh_decode_file(flac_handler_t * fh, const char *fname) {
 	if (!fh->ice->silent && fh->ice->verbose) {
 		fprintf(stderr, "decoding: %s\n", ok ? "succeeded" : "FAILED");
 	}
+
+	fclose(fp);
 
 	FLAC__stream_decoder_finish(fh->decoder);
 
@@ -141,7 +153,7 @@ FLAC__StreamDecoderWriteStatus _decode_write_callback(const FLAC__StreamDecoder 
 	return FLAC__STREAM_DECODER_WRITE_STATUS_CONTINUE;
 }
 
-FLAC__StreamDecoderMetadataCallback _decode_metadata_callback(const FLAC__StreamDecoder *decoder, const FLAC__StreamMetadata *metadata, void *client_data)
+void _decode_metadata_callback(const FLAC__StreamDecoder *decoder, const FLAC__StreamMetadata *metadata, void *client_data)
 {
 	uint32_t i;
 	flac_handler_t * fh = (flac_handler_t *)client_data;
@@ -178,15 +190,15 @@ FLAC__StreamDecoderMetadataCallback _decode_metadata_callback(const FLAC__Stream
 		}
 
 		for(i = 0; i < fh->ice->channels; i++) {
-			fh->buffer[i] = (uint32_t*)malloc((fh->total_samples * (fh->bits_per_sampe / 8)) * sizeof(uint32_t));
+			fh->buffer[i] = (uint32_t*)malloc(((uint32_t)fh->total_samples * (fh->bits_per_sampe / 8)) * sizeof(uint32_t));
 			if (!fh->buffer[i]) {
-				fprintf(stderr, "decoder: unable to allocate buffer for channels\n");
+				fprintf(stderr, "decoder: unable to allocate buffer for the %u. channel\n", i);
 			}
 		}
 	}
 }
 
-FLAC__StreamDecoderErrorCallback _decode_error_callback(const FLAC__StreamDecoder *decoder, FLAC__StreamDecoderErrorStatus status, void *client_data)
+void _decode_error_callback(const FLAC__StreamDecoder *decoder, FLAC__StreamDecoderErrorStatus status, void *client_data)
 {
 	(void)decoder, (void)client_data;
 
@@ -204,12 +216,11 @@ int fh_encode_stream(flac_handler_t * fh) {
 	/* do NOT check the result, it will fail, but works .... */
 	FLAC__stream_encoder_init_ogg_stream(fh->encoder, NULL, _encode_write_callback, NULL, NULL, NULL, (void*)fh);
 
-	fh->streamed_bytes = 0;
 	fh->write_count = 0;
 
 	fh->timestamp = 0;
 	fh->timestamp_new = 0;
-	ok = FLAC__stream_encoder_process(fh->encoder, fh->buffer, fh->total_samples);
+	ok = FLAC__stream_encoder_process(fh->encoder, fh->buffer, (uint32_t)fh->total_samples);
 	//fprintf(stderr, "encoding: %s\n", ok ? "succeeded" : "FAILED");
 
 	FLAC__stream_encoder_finish(fh->encoder);
@@ -242,10 +253,9 @@ static FLAC__StreamEncoderWriteStatus _encode_write_callback(const FLAC__StreamE
 		}
 	} else {
 		/* ogg body */
-		fh->streamed_bytes += bytes;
 
 		if (!fh->ice->silent) {
-			printprogress(fh->timestamp_new, fh->duration);
+			_printprogress(fh->timestamp_new, fh->duration);
 		}
 
 		uint64_t sleepms = (uint64_t)((fh->timestamp_new - fh->timestamp) * 1000.0);
@@ -255,7 +265,7 @@ static FLAC__StreamEncoderWriteStatus _encode_write_callback(const FLAC__StreamE
 		}
 
 #ifdef _WIN32
-		Sleep(sleepms);
+		Sleep((DWORD)sleepms);
 #else
 		usleep(sleepms * 1000);
 #endif
@@ -272,7 +282,7 @@ static FLAC__StreamEncoderWriteStatus _encode_write_callback(const FLAC__StreamE
 	return FLAC__STREAM_ENCODER_WRITE_STATUS_OK;
 }
 
-void printprogress(double time, double duration) {
+void _printprogress(double time, double duration) {
 	int hour = (int)time / 3600;
 	int min = ((int)time / 60) % 60;
 	int sec = (int)time % 60;

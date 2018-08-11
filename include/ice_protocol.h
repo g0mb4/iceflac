@@ -72,15 +72,15 @@ typedef struct S_ICE_CLIENT {
 ice_clinet_t *ice_init(void);
 void ice_destroy(ice_clinet_t * ice);
 
-void ice_set_server(ice_clinet_t * ice, char *server);
-void ice_set_port(ice_clinet_t * ice, char *port);
-void ice_set_user(ice_clinet_t * ice, char *user);
-void ice_set_pass(ice_clinet_t * ice, char *pass);
-void ice_set_mount(ice_clinet_t * ice, char *mount);
+void ice_set_server(ice_clinet_t * ice, const char *server);
+void ice_set_port(ice_clinet_t * ice, const char *port);
+void ice_set_user(ice_clinet_t * ice, const char *user);
+void ice_set_pass(ice_clinet_t * ice, const char *pass);
+void ice_set_mount(ice_clinet_t * ice, const char *mount);
 void ice_set_ice_public(ice_clinet_t * ice, bool p);
-void ice_set_ice_name(ice_clinet_t * ice, char *name);
-void ice_set_artist(ice_clinet_t * ice, char *artist);
-void ice_set_title(ice_clinet_t * ice, char *title);
+void ice_set_ice_name(ice_clinet_t * ice, const char *name);
+void ice_set_artist(ice_clinet_t * ice, const char *artist);
+void ice_set_title(ice_clinet_t * ice, const char *title);
 
 void ice_set_verbose(ice_clinet_t * ice, bool v);
 void ice_set_silent(ice_clinet_t * ice, bool s);
@@ -89,8 +89,8 @@ int ice_connect(ice_clinet_t * ice);
 
 int ice_auth(ice_clinet_t * ice, uint8_t method);
 
-bool base64_encode(char *b64, char *text);
+bool base64_encode(char *b64, const char *text);
 
-int ice_send_data(ice_clinet_t * ice, uint8_t *data, size_t len);
+int ice_send_data(ice_clinet_t * ice, const uint8_t *data, size_t len);
 
 #endif

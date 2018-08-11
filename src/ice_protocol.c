@@ -62,35 +62,35 @@ void ice_destroy(ice_clinet_t * ice) {
 	FREE_POINTER( ice->title );
 }
 
-void ice_set_server(ice_clinet_t * ice, char *server) {
+void ice_set_server(ice_clinet_t * ice, const char *server) {
 	FREE_POINTER( ice->server );
 
 	ice->server = (char*)malloc(strlen(server) + 1);
 	strcpy(ice->server, server);
 }
 
-void ice_set_port(ice_clinet_t * ice, char *port) {
+void ice_set_port(ice_clinet_t * ice, const char *port) {
 	FREE_POINTER( ice->port );
 
 	ice->port = (char*)malloc(strlen(port) + 1);
 	strcpy(ice->port, port);
 }
 
-void ice_set_user(ice_clinet_t * ice, char *user) {
+void ice_set_user(ice_clinet_t * ice, const char *user) {
 	FREE_POINTER( ice->user );
 
 	ice->user = (char*)malloc(strlen(user) + 1);
 	strcpy(ice->user, user);
 }
 
-void ice_set_pass(ice_clinet_t * ice, char *pass) {
+void ice_set_pass(ice_clinet_t * ice, const char *pass) {
 	FREE_POINTER( ice->pass );
 
 	ice->pass = (char*)malloc(strlen(pass) + 1);
 	strcpy(ice->pass, pass);
 }
 
-void ice_set_mount(ice_clinet_t * ice, char *mount) {
+void ice_set_mount(ice_clinet_t * ice, const char *mount) {
 	FREE_POINTER( ice->mount );
 
 	ice->mount = (char*)malloc(strlen(mount) + 1);
@@ -101,21 +101,21 @@ void ice_set_ice_public(ice_clinet_t * ice, bool p) {
 	ice->ice_public = p;
 }
 
-void ice_set_ice_name(ice_clinet_t * ice, char *name) {
+void ice_set_ice_name(ice_clinet_t * ice, const char *name) {
 	FREE_POINTER( ice->ice_name );
 
 	ice->ice_name = (char*)malloc(strlen(name) + 1);
 	strcpy(ice->ice_name, name);
 }
 
-void ice_set_artist(ice_clinet_t * ice, char *artist) {
+void ice_set_artist(ice_clinet_t * ice, const char *artist) {
 	FREE_POINTER( ice->artist );
 
 	ice->artist = (char*)malloc(strlen(artist) + 1);
 	strcpy(ice->artist, artist);
 }
 
-void ice_set_title(ice_clinet_t * ice, char *title) {
+void ice_set_title(ice_clinet_t * ice, const char *title) {
 	FREE_POINTER( ice->title );
 
 	ice->title = (char*)malloc(strlen(title) + 1);
@@ -311,7 +311,7 @@ int ice_auth(ice_clinet_t * ice, uint8_t method) {
 
 /* source: https://github.com/littlstar/b64.c
  */
-bool base64_encode(char *b64, char *text) {
+bool base64_encode(char *b64, const char *text) {
 	/* source:hackme -> c291cmNlOmhhY2ttZQ== */
 	int i = 0;
 	int j = 0;
@@ -386,7 +386,7 @@ bool base64_encode(char *b64, char *text) {
 	return true;
 }
 
-int ice_send_data(ice_clinet_t * ice, uint8_t *data, size_t len) {
+int ice_send_data(ice_clinet_t * ice, const uint8_t *data, size_t len) {
 	int res;
 
 	res = send(ice->socket, data, (int)len, 0);

@@ -30,7 +30,7 @@ typedef struct S_PLAYLIST {
 	bool silent;
 } playlist_t;
 
-playlist_t * pl_init(char *fname);
+playlist_t * pl_init(const char *fname);
 void pl_destroy(playlist_t * pl);
 
 void pl_set_loop(playlist_t * pl, bool l);

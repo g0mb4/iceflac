@@ -30,8 +30,6 @@ typedef struct S_FLAC_HANDLER {
 	uint32_t **buffer;
 	uint32_t buf_position;
 
-	FLAC__uint64 streamed_bytes;
-
 	FLAC__uint32 total_size;
 	FLAC__uint64 total_samples;
 	uint32_t bits_per_sampe;
@@ -53,13 +51,13 @@ int fh_decode_file(flac_handler_t * fh, const char *fname);
 int fh_encode_stream(flac_handler_t * fh);
 
 static FLAC__StreamDecoderWriteStatus _decode_write_callback(const FLAC__StreamDecoder *decoder, const FLAC__Frame *frame, const FLAC__int32 * const buffer[], void *client_data);
-static FLAC__StreamDecoderMetadataCallback _decode_metadata_callback(const FLAC__StreamDecoder *decoder, const FLAC__StreamMetadata *metadata, void *client_data);
-static FLAC__StreamDecoderErrorCallback _decode_error_callback(const FLAC__StreamDecoder *decoder, FLAC__StreamDecoderErrorStatus status, void *client_data);
+static void _decode_metadata_callback(const FLAC__StreamDecoder *decoder, const FLAC__StreamMetadata *metadata, void *client_data);
+static void _decode_error_callback(const FLAC__StreamDecoder *decoder, FLAC__StreamDecoderErrorStatus status, void *client_data);
 
 static FLAC__StreamEncoderWriteStatus _encode_write_callback(const FLAC__StreamEncoder *encoder, const FLAC__byte buffer[], size_t bytes, unsigned samples, unsigned current_frame, void *client_data);
 
-void strtoupper(char *up, char *str);
+static void _strtoupper(char *up, char *str);
 
-void printprogress(double time, double duration);
+static void _printprogress(double time, double duration);
 
 #endif

@@ -1,7 +1,7 @@
 #include "playlist.h"
 
-playlist_t * pl_init(char *fname) {
-	FILE *fp;
+playlist_t * pl_init(const char *fname) {
+	FILE *fp = NULL;
 	char line[1024];
 
 	playlist_t * pl = (playlist_t *)malloc(sizeof(playlist_t));

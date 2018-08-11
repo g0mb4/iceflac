@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
 			printf("%s\n", USER_AGENT);
 			return 0;
 		} else if (!strcmp(argv[a], "-h") || !strcmp(argv[a], "--help")) {
-			printf("%s by gmb, 2018\n\n"
+			printf("%s\n\n"
 				   "usage: iceflac <options>\n\n"
 				   "options:\n"
 				   " -c <file>, --config <file>    : specify custom configuration file (default: iceflac.xml)\n"
@@ -54,6 +54,10 @@ int main(int argc, char **argv) {
 
 	if (cf_get_value("silent", config_val)) {
 		silent = config_val[0] != '0';
+	}
+
+	if (!silent) {
+		printf("%s\n\n", USER_AGENT);
 	}
 
 	// cf_print();
