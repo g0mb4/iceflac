@@ -4,12 +4,8 @@
 
 #include "ice_protocol.h"
 #include "flac_handler.h"
+#include "config_file.h"
 #include "playlist.h"
-
-/* FLAC */
-#include "share/utf8.h"
-#include "share/win_utf8_io.h"
-#include "share/windows_unicode_filenames.h"
 
 int main(int argc, char **argv) {
 	ice_clinet_t* ice = NULL;
@@ -93,7 +89,7 @@ int main(int argc, char **argv) {
 	bool first_track = true;
 
 	if (ice) {
-		
+
 		if (cf_get_value("server", config_val)) {
 			ice_set_server(ice, config_val);
 		} else {
@@ -166,7 +162,7 @@ int main(int argc, char **argv) {
 						}
 						if (err == 0) {
 							if (!ice->silent) {
-								fprintf_utf8(stderr, "\nplaying: %s - %s (%s)\n", ice->artist, ice->title, file_name);
+								printf("\nplaying: %s - %s (%s)\n", ice->artist, ice->title, file_name);
 							}
 							err = fh_encode_stream(flac);
 							if (err == 0) {

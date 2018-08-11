@@ -1,20 +1,25 @@
 #ifndef __FLAC_HANDLER_H__
 #define __DLAC_HANDLER_H__
 
-#define FLAC__NO_DLL
-#define _CRT_SECURE_NO_WARNINGS
+#ifdef _WIN32
+	#define FLAC__NO_DLL
+	#define _CRT_SECURE_NO_WARNINGS
+
+#else
+	#include <unistd.h>
+#endif
 
 #include <stdint.h>
 
 #include "ice_protocol.h"
 
+/* OGG */
 #include <ogg/ogg.h>
 
 /* FALC includes */
 #include "FLAC/metadata.h"
 #include "FLAC/stream_decoder.h"
 #include "FLAC/stream_encoder.h"
-#include "share/compat.h"
 
 #define FREE_POINTER( x )	{ if( x ) { free( x ); } }
 

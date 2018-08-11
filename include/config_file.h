@@ -1,8 +1,10 @@
 #ifndef __CONFIG_FILE_H__
 #define __CONFIG_FILE_H__
 
-#define WIN32_LEAN_AND_MEAN
-#define _CRT_SECURE_NO_WARNINGS
+#ifdef _WIN32
+	#define FLAC__NO_DLL
+	#define _CRT_SECURE_NO_WARNINGS
+#endif
 
 #define XML_STATIC
 
@@ -10,7 +12,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "mxml/mxml.h"
+#include <mxml/mxml.h>
 
 typedef struct S_CF_PAIR {
 	char *key;

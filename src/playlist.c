@@ -3,7 +3,6 @@
 playlist_t * pl_init(char *fname) {
 	FILE *fp;
 	char line[1024];
-	char line_uft8[2048];
 
 	playlist_t * pl = (playlist_t *)malloc(sizeof(playlist_t));
 	memset(pl, 0, sizeof(playlist_t));
@@ -38,7 +37,7 @@ playlist_t * pl_init(char *fname) {
 		//else {
 		//	fprintf(stderr, "playlist: utf8_encode() failed\n");
 		//}
-		
+
 	}
 
 	fclose(fp);
@@ -81,7 +80,7 @@ bool _pl_add(playlist_t * pl, char *file) {
 			file[ind - 1] = '\0';
 		}
 
-		pl->list[pl->len] = (char *)malloc(strlen_utf8(file) + 1);
+		pl->list[pl->len] = (char *)malloc(strlen(file) + 1);
 		strcpy(pl->list[pl->len], file);
 		pl->len++;
 	}
@@ -95,7 +94,7 @@ bool _pl_add(playlist_t * pl, char *file) {
 		uint32_t i;
 
 		for (i = 0; i < pl->len; i++) {
-			new_list[i] = (char *)malloc(strlen_utf8(pl->list[i]) + 1);
+			new_list[i] = (char *)malloc(strlen(pl->list[i]) + 1);
 			strcpy(new_list[i], pl->list[i]);
 		}
 
@@ -107,7 +106,7 @@ bool _pl_add(playlist_t * pl, char *file) {
 
 		pl->list = new_list;
 
-		pl->list[(pl->len + 1)] = (char *)malloc(strlen_utf8(file) + 1);
+		pl->list[(pl->len + 1)] = (char *)malloc(strlen(file) + 1);
 		strcpy(pl->list[(pl->len + 1)], file);
 		pl->len++;
 	}
@@ -153,12 +152,12 @@ void pl_print(playlist_t * pl) {
 		uint32_t i;
 
 		if (pl->verbose) {
-			fprintf(stderr, "loop   : %s\n", pl->loop ? "true" : "false");
-			fprintf(stderr, "random : %s\n", pl->random ? "true" : "false");
+			printf("loop   : %s\n", pl->loop ? "true" : "false");
+			printf("random : %s\n", pl->random ? "true" : "false");
 		}
 
 		for (i = 0; i < pl->len; i++) {
-			fprintf_utf8(stderr, "%s\n", pl->list[i]);
+			printf("%s\n", pl->list[i]);
 		}
 		printf("\n");
 	}

@@ -1,18 +1,17 @@
 #ifndef __PLAYLIST_H__
 #define __PLAYLIST_H__
 
-#define WIN32_LEAN_AND_MEAN
-#define _CRT_SECURE_NO_WARNINGS
+#ifdef _WIN32
+	#define WIN32_LEAN_AND_MEAN
+	#define _CRT_SECURE_NO_WARNINGS
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 #include <time.h>
-
-#include "share/utf8.h"
-#include "share/win_utf8_io.h"
-#include "share/windows_unicode_filenames.h"
 
 #define FREE_POINTER( x )	{ if( x ) { free( x ); } }
 

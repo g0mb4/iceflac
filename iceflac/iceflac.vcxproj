@@ -85,9 +85,10 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>_MBCS;_WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>Ws2_32.lib;Mswsock.lib;AdvApi32.lib;libFLAC_static.lib;libogg_static.lib;grabbag_static.lib;utf8_static.lib;win_utf8_io_static.lib;mxml1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Ws2_32.lib;Mswsock.lib;AdvApi32.lib;libFLAC_static.lib;libogg_static.lib;mxml1.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy /Y "$(SolutionDir)..\settings\iceflac.xml" "$(SolutionDir)..\build\$(Configuration)\iceflac.xml"</Command>
@@ -109,11 +110,12 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>_MBCS;_WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>Ws2_32.lib;Mswsock.lib;AdvApi32.lib;libFLAC_static.lib;libogg_static.lib;grabbag_static.lib;utf8_static.lib;win_utf8_io_static.lib;mxml1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Ws2_32.lib;Mswsock.lib;AdvApi32.lib;libFLAC_static.lib;libogg_static.lib;mxml1.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy /Y "$(SolutionDir)..\settings\iceflac.xml" "$(SolutionDir)..\build\$(Configuration)\iceflac.xml"</Command>

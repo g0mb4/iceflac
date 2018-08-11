@@ -4,6 +4,7 @@ ice_clinet_t *ice_init(void) {
 	ice_clinet_t* ice = (ice_clinet_t*)malloc(sizeof(ice_clinet_t));
 	memset(ice, 0, sizeof(ice_clinet_t));
 
+#ifdef _WIN32
 	WSADATA wsaData;
 	int res;
 
@@ -12,6 +13,7 @@ ice_clinet_t *ice_init(void) {
 		fprintf(stderr, "ice: WSAStartup() failed with error: %d\n", res);
 		return NULL;
 	}
+#endif
 
 	ice->socket = INVALID_SOCKET;
 	ice->server = NULL;
@@ -32,6 +34,8 @@ ice_clinet_t *ice_init(void) {
 }
 
 void ice_destroy(ice_clinet_t * ice) {
+
+#ifdef _WIN32
 	if (ice->socket != INVALID_SOCKET) {
 		int res = shutdown(ice->socket, SD_SEND);
 		if (res == SOCKET_ERROR) {
@@ -41,6 +45,11 @@ void ice_destroy(ice_clinet_t * ice) {
 		closesocket(ice->socket);
 		WSACleanup();
 	}
+#else
+	if (ice->socket != INVALID_SOCKET) {
+		close(ice->socket);
+	}
+#endif
 
 	FREE_POINTER( ice->server );
 	FREE_POINTER( ice->port );
@@ -127,6 +136,7 @@ int ice_connect(ice_clinet_t * ice){
 		return -1;
 	}
 
+#ifdef _WIN32
 	struct addrinfo *result = NULL, *ptr = NULL, hints;
 	int res;
 
@@ -166,7 +176,31 @@ int ice_connect(ice_clinet_t * ice){
 		WSACleanup();
 		return -4;
 	}
+#else
+	struct hostent *he;
+	struct sockaddr_in addr;
 
+	if ((he = gethostbyname(ice->server)) == NULL) {
+		fprintf(stderr, "ice: gethostbyname() failed\n");
+		return -2;
+	}
+
+	if ((ice->socket = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+		fprintf(stderr, "ice: socket() failed\n");
+		return -3;
+	}
+
+	addr.sin_family = AF_INET;
+	addr.sin_port = htons(atoi(ice->port));
+	addr.sin_addr = *((struct in_addr *)he->h_addr);
+	bzero(&(addr.sin_zero), 8);
+
+	if (connect(ice->socket, (struct sockaddr *)&addr, sizeof(struct sockaddr)) == -1) {
+		fprintf(stderr, "ice: connect() failed\n");
+		return -4;
+	}
+
+#endif
 	return 0;
 }
 
@@ -187,7 +221,7 @@ int ice_auth(ice_clinet_t * ice, uint8_t method) {
 
 	int len = strlen(ice->user) + 1 + strlen(ice->pass) + 1;
 	char *user_pass = (char *)malloc(len);
-	sprintf_s(user_pass, len, "%s:%s", ice->user, ice->pass);
+	sprintf(user_pass, "%s:%s", ice->user, ice->pass);
 
 	if (!base64_encode(user_pass_64, user_pass)) {
 		fprintf(stderr, "ice: base64_encode() failed\n");
@@ -195,7 +229,7 @@ int ice_auth(ice_clinet_t * ice, uint8_t method) {
 	}
 
 	if (method == AUTH_SOURCE) {
-		sprintf_s(auth_message, 1024,
+		sprintf(auth_message,
 			"SOURCE /%s HTTP/1.0\r\n"
 			"Authorization: Basic %s\r\n"
 			"User-Agent: %s\r\n"
@@ -209,7 +243,7 @@ int ice_auth(ice_clinet_t * ice, uint8_t method) {
 
 	}
 	else if (method == AUTH_PUT) {
-		sprintf_s(auth_message, 1024,
+		sprintf(auth_message,
 			"PUT /%s HTTP/1.0\r\n"
 			"Authorization: Basic %s\r\n"
 			"User-Agent: %s\r\n"
@@ -228,10 +262,15 @@ int ice_auth(ice_clinet_t * ice, uint8_t method) {
 	}
 
 	res = send(ice->socket, auth_message, (int)strlen(auth_message), 0);
-	if (res == SOCKET_ERROR) {
-		printf("ice: send() failed with error: %d\n", WSAGetLastError());
+	if (res == -1) {
+#ifdef _WIN32
+		fprintf(stderr, "ice: send() failed with error: %d\n", WSAGetLastError());
 		closesocket(ice->socket);
 		WSACleanup();
+#else
+		fprintf(stderr, "ice: send() failed\n");
+		close(ice->socket);
+#endif
 		return -3;
 	}
 
@@ -258,7 +297,11 @@ int ice_auth(ice_clinet_t * ice, uint8_t method) {
 			fprintf(stderr, "ice: connection closed\n");
 		}
 		else {
+#ifdef _WIN32
 			fprintf(stderr, "ice: recv() failed with error: %d\n", WSAGetLastError());
+#else
+			fprintf(stderr, "ice: recv() failed\n");
+#endif
 		}
 
 	} while (res > 0);
@@ -279,8 +322,8 @@ bool base64_encode(char *b64, char *text) {
 
 	// alloc
 	enc = (char *)malloc(sizeof(char));
-	if (!enc) { 
-		return false; 
+	if (!enc) {
+		return false;
 	}
 
 	// parse until end of source
@@ -328,7 +371,7 @@ bool base64_encode(char *b64, char *text) {
 			enc[size++] = b64_table[buf[j]];
 		}
 
-		// while there is still a remainder append '=' 
+		// while there is still a remainder append '='
 		while ((i++ < 3)) {
 			enc = (char *)realloc(enc, size + 1);
 			enc[size++] = '=';
@@ -345,16 +388,16 @@ bool base64_encode(char *b64, char *text) {
 
 int ice_send_data(ice_clinet_t * ice, uint8_t *data, size_t len) {
 	int res;
-	char recvbuf[512];
-	int recvbuflen = 512;
 
 	res = send(ice->socket, data, (int)len, 0);
-	if (res == SOCKET_ERROR) {
-		fprintf(stderr, "ice: send() failed with error: %d\n", WSAGetLastError());
+	if (res == -1) {
+#ifdef _WIN32
+			fprintf(stderr, "ice: send() failed with error: %d\n", WSAGetLastError());
+#else
+			fprintf(stderr, "ice: send() failed\n");
+#endif
 		return -1;
 	}
 
 	return 0;
 }
-
-

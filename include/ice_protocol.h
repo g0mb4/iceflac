@@ -1,12 +1,27 @@
 #ifndef __ICE_PROTOCOL_H__
 #define __ICE_PROTOCOL_H__
 
-#define WIN32_LEAN_AND_MEAN
-#define _CRT_SECURE_NO_WARNINGS
+#ifdef _WIN32
+	#define WIN32_LEAN_AND_MEAN
+	#define _CRT_SECURE_NO_WARNINGS
 
-#include <windows.h>
-#include <winsock2.h>
-#include <ws2tcpip.h>
+	#include <windows.h>
+	#include <winsock2.h>
+	#include <ws2tcpip.h>
+
+	#define SOCK	 SOCKET
+#else
+	#include <netdb.h>
+	#include <sys/types.h>
+	#include <netinet/in.h>
+	#include <sys/socket.h>
+	#include <unistd.h>
+	#include <string.h>
+
+	#define SOCK	 		int
+	#define INVALID_SOCKET 	(-1)
+#endif
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -33,7 +48,7 @@ enum {
 };
 
 typedef struct S_ICE_CLIENT {
-	SOCKET socket;
+	SOCK socket;
 
 	char *server;
 	char *port;
