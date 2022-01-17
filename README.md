@@ -46,6 +46,11 @@ Copy the ```settings/iceflac.xml``` next to the ```iceflac.exe```.
 Modify the content of the ```iceflac.xml```.
 To use such a high bitrate a FLAC can provide modify the  ```<limits> / <queue-size>``` setting in the configuration file of the icecast server. My setting is ```<queue-size>111524288</queue-size>```.
 
+```
+iceflac.exe -p playlist.txt
+```
+where ```playlist.txt``` is a text file, where every line contains the path of a .FLAC file.
+
 Use ```iceflac --help``` for additional informaton.
 
 ## TODO
