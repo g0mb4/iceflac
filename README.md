@@ -23,8 +23,6 @@ Compile everything as *Relese* into a **STATIC** library, so without the .DLL fi
     +-- libFLAC_static.lib
     +-- libogg_static.lib
     +-- mxml1.lib
-    +-- utf8_static.lib
-    +-- win_utf8_io_static.lib
 ```
 Copy the include directories from ```flac/include```, ```libogg/include```, ```mxml/*.h``` to the  ```include ``` directory, it should look like this:
 ```
@@ -33,7 +31,6 @@ Copy the include directories from ```flac/include```, ```libogg/include```, ```m
     +-- FLAC	(flac/include/FLAC)
     +-- mxml	(mxml/*.h, create this directory)
     +-- ogg     (libogg/include/ogg)
-    +-- share	(include/share)
     +-- ...
 ```
 Open the ```iceflac/iceflac.sln``` and compile the code.
