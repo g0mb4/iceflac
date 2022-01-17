@@ -15,14 +15,13 @@ Required libraries:
 - mxml : https://github.com/michaelrsweet/mxml
 
 ## Build - Windows
-Compile everything as *Relese* into a **STATIC** library, so without the .DLL files. Copy the necessary files to the ```lib``` directory, it should look like this:
+Compile everything as *Release* into a **STATIC** library, so without the .DLL files. Copy the necessary files to the ```lib``` directory, it should look like this:
 ```
 .
 +-- lib
-    +-- grabbag_static.lib
     +-- libFLAC_static.lib
     +-- libogg_static.lib
-    +-- mxml1.lib
+    +-- mxmlstat.lib
 ```
 Copy the include directories from ```flac/include```, ```libogg/include```, ```mxml/*.h``` to the  ```include ``` directory, it should look like this:
 ```
@@ -31,7 +30,6 @@ Copy the include directories from ```flac/include```, ```libogg/include```, ```m
     +-- FLAC	(flac/include/FLAC)
     +-- mxml	(mxml/*.h, create this directory)
     +-- ogg     (libogg/include/ogg)
-    +-- ...
 ```
 Open the ```iceflac/iceflac.sln``` and compile the code.
 If everything was done correctly the ```iceflac.exe``` will be in the ```build/Release(Debug)``` directory.
