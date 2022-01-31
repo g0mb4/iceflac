@@ -1,5 +1,8 @@
 #include "flac_handler.h"
 
+static void _strtoupper(char *up, char *str);
+static void _printprogress(double time, double duration);
+
 flac_handler_t * fh_init(ice_clinet_t *ice) {
 	flac_handler_t * fh = (flac_handler_t*)malloc(sizeof(flac_handler_t));
 	memset(fh, 0, sizeof(flac_handler_t));

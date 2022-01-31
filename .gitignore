@@ -8,3 +8,4 @@ build/iceflac.xml
 *.o
 *.m3u
 *.out
+*.d

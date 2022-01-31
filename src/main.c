@@ -13,35 +13,37 @@ int main(int argc, char **argv) {
 	bool cmd_playlist = false;
 
 	char config_val[64];
-	int err = 0, a;
+	int err = 0;
+	int return_number = 0;
 	bool verbose = true, silent = false;
 
-	for (a = 0; a < argc; a++) {
+	for (int a = 0; a < argc; a++) {
 		if (!strcmp(argv[a], "-c") || !strcmp(argv[a], "--config")) {
-			strcpy(config_file, argv[++a]);
+			strncpy(config_file, argv[++a], sizeof(config_file) - 1);
 		} else if (!strcmp(argv[a], "-p") || !strcmp(argv[a], "--playlist")) {
-			strcpy(play_list, argv[++a]);
+			strncpy(play_list, argv[++a], sizeof(play_list) - 1);
 			cmd_playlist = true;
 		} else if (!strcmp(argv[a], "-v") || !strcmp(argv[a], "--version")) {
 			printf("%s\n", USER_AGENT);
-			return 0;
+			return return_number;
 		} else if (!strcmp(argv[a], "-h") || !strcmp(argv[a], "--help")) {
 			printf("%s\n\n"
 				   "usage: iceflac <options>\n\n"
 				   "options:\n"
 				   " -c <file>, --config <file>    : specify custom configuration file (default: iceflac.xml)\n"
-				   " -p <file>, --playlist <file>  : specify playlist file,\n "
+				   " -p <file>, --playlist <file>  : specify playlist file (default: playlist.m3u)\n "
 				   "                                 this will be used regardless of the configuration file\n"
 				   " -v, --version                 : version information\n"
 				   " -h, --help                    : this screen\n"
 				, USER_AGENT);
-			return 0;
+			return return_number;
 		}
 	}
 
 	if (cf_load(config_file) < 0) {
 		fprintf(stderr, "cannot load configuration file '%s'\n", config_file);
-		return 1;
+		return_number = 1;
+		goto end;
 	}
 
 	if (cf_get_value("verbose", config_val)) {
@@ -56,19 +58,19 @@ int main(int argc, char **argv) {
 		printf("%s\n\n", USER_AGENT);
 	}
 
-	// cf_print();
-
 	if (!cmd_playlist) {
 		if (!cf_get_value("playlist", play_list)) {
 			fprintf(stderr, "cannot find property 'playlist'\n");
-			return 2;
+			return_number = 2;
+			goto end_cf;
 		}
 	}
 
 	pl = pl_init(play_list);
 	if (!pl) {
 		fprintf(stderr, "cannot load playlist\n");
-		return 3;
+		return_number = 3;
+		goto end_pl;
 	}
 
 	if (cf_get_value("loop", config_val)) {
@@ -82,120 +84,132 @@ int main(int argc, char **argv) {
 	pl_set_verbose(pl, verbose);
 	pl_set_silent(pl, silent);
 
-	pl_print(pl);
+	if(!silent){
+		pl_print(pl);
+	}
 
 	ice = ice_init();
 	bool first_track = true;
 
-	if (ice) {
+	if (!ice) {
+		fprintf(stderr, "initialization failed %d\n", err);
+		return_number = 4;
+		goto end_pl;
+	}
 
-		if (cf_get_value("server", config_val)) {
-			ice_set_server(ice, config_val);
-		} else {
-			fprintf(stderr, "cannot find property 'server'\n");
-		}
+	if (cf_get_value("server", config_val)) {
+		ice_set_server(ice, config_val);
+	} else {
+		fprintf(stderr, "cannot find property 'server'\n");
+		return_number = 5;
+		goto end_ice;
+	}
 
-		if (cf_get_value("port", config_val)) {
-			ice_set_port(ice, config_val);
-		} else {
-			fprintf(stderr, "cannot find property 'port'\n");
-		}
+	if (cf_get_value("port", config_val)) {
+		ice_set_port(ice, config_val);
+	} else {
+		fprintf(stderr, "cannot find property 'port'\n");
+		return_number = 5;
+		goto end_ice;
+	}
 
-		if (cf_get_value("user", config_val)) {
-			ice_set_user(ice, config_val);
-		} else {
-			fprintf(stderr, "cannot find property 'user'\n");
-		}
+	if (cf_get_value("user", config_val)) {
+		ice_set_user(ice, config_val);
+	} else {
+		fprintf(stderr, "cannot find property 'user'\n");
+		return_number = 5;
+		goto end_ice;
+	}
 
-		if (cf_get_value("password", config_val)) {
-			ice_set_pass(ice, config_val);
-		} else {
-			fprintf(stderr, "cannot find property 'password'\n");
-		}
+	if (cf_get_value("password", config_val)) {
+		ice_set_pass(ice, config_val);
+	} else {
+		fprintf(stderr, "cannot find property 'password'\n");
+		return_number = 5;
+		goto end_ice;
+	}
 
-		if (cf_get_value("mount", config_val)) {
-			ice_set_mount(ice, config_val);
-		} else {
-			fprintf(stderr, "cannot find property 'mount'\n");
-		}
+	if (cf_get_value("mount", config_val)) {
+		ice_set_mount(ice, config_val);
+	} else {
+		fprintf(stderr, "cannot find property 'mount'\n");
+		return_number = 5;
+		goto end_ice;
+	}
 
-		if (cf_get_value("public", config_val)) {
-			ice_set_ice_public(ice, config_val[0] != '0');
-		}
+	if (cf_get_value("public", config_val)) {
+		ice_set_ice_public(ice, config_val[0] != '0');
+	}
 
-		if (cf_get_value("name", config_val)) {
-			ice_set_ice_name(ice, config_val);
-		}
+	if (cf_get_value("name", config_val)) {
+		ice_set_ice_name(ice, config_val);
+	}
 
-		ice_set_verbose(ice, verbose);
-		ice_set_silent(ice, silent);
+	ice_set_verbose(ice, verbose);
+	ice_set_silent(ice, silent);
 
-		flac = fh_init(ice);
-		if (flac) {
-			err = ice_connect(ice);
-			if (err == 0) {
-				char file_name[1024];
-				while(pl_get_next(pl, file_name)) {
-					err = fh_decode_file(flac, file_name);
-					if (err == 0) {
-						if (first_track) {
-							err = ice_auth(ice, AUTH_PUT);
-							if (err == 0) {
-								if (!ice->silent) {
-									printf("connected to: %s:%s/%s as %s\n", ice->server, ice->port, ice->mount, ice->user);
-								}
-							}
-							else {
-								fprintf(stderr, "authentication with PUT method failed with error: %d\n", err);
-								err = ice_auth(ice, AUTH_SOURCE);
-								if (err == 0) {
-									if (!ice->silent) {
-										printf("connected to: %s:%s/%s as %s\n", ice->server, ice->port, ice->mount, ice->user);
-									}
-								} else {
-									fprintf(stderr, "authentication with SOURCE method failed with error: %d\n", err);
-								}
-							}
+	flac = fh_init(ice);
+	if (!flac) {
+		fprintf(stderr, "flac initialization failed: %d\n", err);
+		return_number = 6;
+		goto end_ice;
+	}
 
-							first_track = false;
-						}
-						if (err == 0) {
-							if (!ice->silent) {
-								printf("\nplaying: %s - %s (%s)\n", ice->artist, ice->title, file_name);
-							}
-							err = fh_encode_stream(flac);
-							if (err == 0) {
-								fprintf(stderr, "streaming done\n");
-							}
-							else {
-								fprintf(stderr, "cannot encode stream: %d\n", err);
-							}
-						}
-						else {
-							fprintf(stderr, "authentication failed\n");
-						}
+	err = ice_connect(ice);
+	if (err != 0) {
+		fprintf(stderr, "cannot connect to the server: %d\n", err);
+		return_number = 7;
+		goto end_flac;
+	}
+
+	const char * file_name = NULL;
+	while((file_name = pl_get_next(pl)) != NULL) {
+		err = fh_decode_file(flac, file_name);
+		if (err == 0) {
+			if (first_track) {
+				err = ice_auth(ice, AUTH_PUT);
+				if (err == 0) {
+					if (!silent) {
+						printf("connected to: %s:%s/%s as %s\n", ice->server, ice->port, ice->mount, ice->user);
 					}
-					else {
-						fprintf(stderr, "cannot decode file: %d\n", err);
+				} else {
+					fprintf(stderr, "authentication with PUT method failed with error: %d\n", err);
+					err = ice_auth(ice, AUTH_SOURCE);
+					if (err == 0) {
+						if (!silent) {
+							printf("connected to: %s:%s/%s as %s\n", ice->server, ice->port, ice->mount, ice->user);
+						}
+					} else {
+						fprintf(stderr, "authentication with SOURCE method failed with error: %d\n", err);
+						return_number = 8;
+						goto end_flac;
 					}
 				}
+
+				first_track = false;
 			}
-			else {
-				fprintf(stderr, "cannot connect to the server: %d\n", err);
+
+			if (!silent) {
+				printf("\nplaying: %s - %s (%s)\n", ice->artist, ice->title, file_name);
 			}
+
+			err = fh_encode_stream(flac);
+			if (err != 0) {
+				fprintf(stderr, "cannot encode stream: %d\n", err);
+			}
+		} else {
+			fprintf(stderr, "cannot decode file: %d\n", err);
 		}
-		else {
-			fprintf(stderr, "flac initialization failed: %d\n", err);
-		}
-	}
-	else {
-		fprintf(stderr, "initialization failed %d\n", err);
 	}
 
-	printf("done.\n");
-	cf_destroy();
+end_flac:
 	fh_destroy(flac);
+end_ice:
 	ice_destroy(ice);
+end_pl:
 	pl_destroy(pl);
-	return 0;
+end_cf:
+	cf_destroy();
+end:
+	return return_number;
 }

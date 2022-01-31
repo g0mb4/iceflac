@@ -1,5 +1,9 @@
 #include "playlist.h"
 
+static const char * _pl_get(playlist_t * pl);
+static const char * _pl_get_random(playlist_t * pl);
+static bool _pl_add(playlist_t * pl, char *line);
+
 playlist_t * pl_init(const char *fname) {
 	FILE *fp = NULL;
 	char line[1024];
@@ -73,7 +77,7 @@ void pl_set_silent(playlist_t * pl, bool s) {
 	pl->silent = s;
 }
 
-bool _pl_add(playlist_t * pl, char *file) {
+static bool _pl_add(playlist_t * pl, char *file) {
 	if (pl->len < pl->cap) {
 		uint32_t ind = strlen(file);
 		if (file[ind - 1] == '\n') {
@@ -114,37 +118,30 @@ bool _pl_add(playlist_t * pl, char *file) {
 	return true;
 }
 
-bool pl_get_next(playlist_t * pl, char *file) {
+const char* pl_get_next(playlist_t * pl) {
 	if (pl->random) {
-		return _pl_get_random(pl, file);
+		return _pl_get_random(pl);
 	} else {
-		return _pl_get(pl, file);
+		return _pl_get(pl);
 	}
 }
 
-bool _pl_get(playlist_t * pl, char *file) {
+static const char*  _pl_get(playlist_t * pl) {
 	if (pl->current == pl->len) {
 		if (pl->loop) {
 			pl->current = 0;
-			return true;
+		} else {
+			return NULL;
 		}
-		else {
-			return false;
-		}
-
 	}
 
-	strcpy(file, pl->list[pl->current++]);
-
-	return true;
+	return pl->list[pl->current++];
 }
 
-bool _pl_get_random(playlist_t * pl, char *file) {
+static const char*  _pl_get_random(playlist_t * pl) {
 	int r = rand() % pl->len;
 
-	strcpy(file, pl->list[r]);
-
-	return true;
+	return pl->list[r];
 }
 
 void pl_print(playlist_t * pl) {

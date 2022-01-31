@@ -58,8 +58,4 @@ static void _decode_error_callback(const FLAC__StreamDecoder *decoder, FLAC__Str
 
 static FLAC__StreamEncoderWriteStatus _encode_write_callback(const FLAC__StreamEncoder *encoder, const FLAC__byte buffer[], size_t bytes, unsigned samples, unsigned current_frame, void *client_data);
 
-static void _strtoupper(char *up, char *str);
-
-static void _printprogress(double time, double duration);
-
 #endif

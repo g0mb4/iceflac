@@ -41,12 +41,7 @@ void pl_set_random(playlist_t * pl, bool r);
 void pl_set_verbose(playlist_t * pl, bool v);
 void pl_set_silent(playlist_t * pl, bool s);
 
-bool _pl_add(playlist_t * pl, char *line);
-
-bool pl_get_next(playlist_t * pl, char *file);
-
-bool _pl_get(playlist_t * pl, char *file);
-bool _pl_get_random(playlist_t * pl, char *file);
+const char* pl_get_next(playlist_t * pl);
 
 void pl_print(playlist_t * pl);
 
