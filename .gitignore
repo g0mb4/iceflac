@@ -2,3 +2,9 @@
 .vs/
 x64/
 lib/
+build/iceflac
+build/iceflac.xml
+*.flac
+*.o
+*.m3u
+*.out
