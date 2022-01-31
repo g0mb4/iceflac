@@ -36,7 +36,7 @@ Copy the include directories from ```flac/include```, ```libogg/include```, ```m
 +-- include
     +-- FLAC (flac/include/FLAC)
     +-- mxml (mxml/*.h, create this directory)
-    +-- ogg     (libogg/include/ogg)
+    +-- ogg  (libogg/include/ogg)
 ```
 
 Open the ```iceflac/iceflac.sln``` and compile the code.
@@ -67,7 +67,7 @@ The ```iceflac``` binary will be in the ```build``` build directory.
 
 ## Usage
 
-Copy the ```settings/iceflac.xml``` next to the ```iceflac.exe```.
+Copy the ```settings/iceflac.xml``` next to the ```iceflac``` executable.
 Modify the content of the ```iceflac.xml```.
 To use such a high bitrate a FLAC can provide modify the  ```<limits> / <queue-size>``` setting in the configuration file of the icecast server. My setting is ```<queue-size>111524288</queue-size>```.
 
