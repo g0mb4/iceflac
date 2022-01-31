@@ -92,7 +92,7 @@ int fh_decode_file(flac_handler_t * fh, const char *fname) {
 					ice_set_title(fh->ice, value);
 				}
 
-				free(name_up);
+				FREE_POINTER( name_up );
 			}
 		}
 	}
@@ -110,9 +110,9 @@ int fh_decode_file(flac_handler_t * fh, const char *fname) {
 		fprintf(stderr, "decoding: %s\n", ok ? "succeeded" : "FAILED");
 	}
 
-	fclose(fp);
-
 	FLAC__stream_decoder_finish(fh->decoder);
+
+	//fclose(fp); FLAC__stream_decoder_finish() will close the file
 
 	return ok ? 0 : -2;
 }
@@ -177,7 +177,7 @@ void _decode_metadata_callback(const FLAC__StreamDecoder *decoder, const FLAC__S
 			fprintf(stderr, "sample rate    : %u Hz\n", fh->ice->ice_samplerate);
 			fprintf(stderr, "channels       : %u\n", fh->ice->channels);
 			fprintf(stderr, "bits per sample: %u\n", fh->bits_per_sampe);
-			fprintf(stderr, "total samples  : %llu\n", fh->total_samples);
+			fprintf(stderr, "total samples  : %lu\n", fh->total_samples);
 			fprintf(stderr, "total size     : %u B\n", fh->total_size);
 			fprintf(stderr, "duration       : %.4f s\n", fh->duration);
 			fprintf(stderr, "bitrate (FALC) : %u kb/s\n", fh->bitrate);

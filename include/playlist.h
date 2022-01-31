@@ -13,7 +13,9 @@
 #include <string.h>
 #include <time.h>
 
-#define FREE_POINTER( x )	{ if( x ) { free( x ); } }
+#ifndef FREE_POINTER
+	#define FREE_POINTER( x )	{ if( x ) { free( x ); x = NULL; } }
+#endif
 
 typedef struct S_PLAYLIST {
 	char **list;

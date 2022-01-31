@@ -4,12 +4,12 @@
 #ifdef _WIN32
 	#define FLAC__NO_DLL
 	#define _CRT_SECURE_NO_WARNINGS
-
 #else
 	#include <unistd.h>
 #endif
 
 #include <stdint.h>
+#include <ctype.h>
 
 #include "ice_protocol.h"
 
@@ -21,7 +21,9 @@
 #include "FLAC/stream_decoder.h"
 #include "FLAC/stream_encoder.h"
 
-#define FREE_POINTER( x )	{ if( x ) { free( x ); } }
+#ifndef FREE_POINTER
+	#define FREE_POINTER( x )	{ if( x ) { free( x ); x = NULL; } }
+#endif
 
 typedef struct S_FLAC_HANDLER {
 	FLAC__StreamDecoder *decoder;

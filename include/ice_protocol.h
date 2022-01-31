@@ -29,7 +29,10 @@
 
 #define USER_AGENT		"iceflac/1.0"
 
-#define FREE_POINTER( x )	{ if( x ) { free( x ); } }
+#ifndef FREE_POINTER
+	//#define FREE_POINTER( x )	{ if( x ) { free( x ); } }
+	#define FREE_POINTER( x )
+#endif
 
 static const char b64_table[] = {
 	'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',

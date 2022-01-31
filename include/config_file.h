@@ -12,7 +12,11 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include <mxml/mxml.h>
+#ifdef _WIN32
+	#include <mxml/mxml.h>
+#else
+	#include <mxml.h>
+#endif
 
 typedef struct S_CF_PAIR {
 	char *key;

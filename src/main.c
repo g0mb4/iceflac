@@ -1,7 +1,3 @@
-#define _CRT_SECURE_NO_WARNINGS
-
-#include <stdio.h>
-
 #include "ice_protocol.h"
 #include "flac_handler.h"
 #include "config_file.h"
@@ -89,7 +85,6 @@ int main(int argc, char **argv) {
 	pl_print(pl);
 
 	ice = ice_init();
-	bool auth = false;
 	bool first_track = true;
 
 	if (ice) {
@@ -197,6 +192,7 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "initialization failed %d\n", err);
 	}
 
+	printf("done.\n");
 	cf_destroy();
 	fh_destroy(flac);
 	ice_destroy(ice);
